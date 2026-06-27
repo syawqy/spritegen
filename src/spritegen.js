@@ -59,6 +59,7 @@ function darken(hex, amt) {
 }
 
 function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function pickColor() { return pick(PALETTES[pick(Object.keys(PALETTES))]); }
 function randInt(a,b) { return a + Math.floor(Math.random()*(b-a+1)); }
 function randFloat(a,b) { return a + Math.random()*(b-a); }
 function chance(p) { return Math.random() < p; }
@@ -866,7 +867,6 @@ class SpriteGen {
 // EXPORTS
 // ═══════════════════════════════════════════
 // ES Module
-export { SpriteGen, SPECS, PALETTES };
 
 // UMD / global
 if (typeof window !== 'undefined') {
