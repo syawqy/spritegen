@@ -1,0 +1,17 @@
+{
+  "name": "spritegen",
+  "version": "1.0.0",
+  "description": "Procedural pixel art sprite generator for 2D games. Generate characters, monsters, buildings, vehicles, plants, items, and props with animation frames.",
+  "main": "src/spritegen.js",
+  "type": "module",
+  "scripts": {
+    "demo": "npx serve examples -p 8892"
+  },
+  "keywords": ["sprite", "pixel-art", "game-dev", "procedural", "2d", "phaser"],
+  "author": "syawqy",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/syawqy/spritegen"
+  }
+}

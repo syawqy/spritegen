@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SpriteGen Demo</title>
+<style>
+body { background: #111; color: #eee; font-family: system-ui; padding: 20px; }
+h1 { color: #e94560; }
+h2 { color: #e94560; margin-top: 30px; border-bottom: 2px solid #2a2a3e; padding-bottom: 8px; }
+.grid { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.sprite-box { background: #1a1a2e; padding: 12px; border-radius: 8px; text-align: center; border: 2px solid #2a2a3e; }
+.sprite-box canvas { display: block; margin: 0 auto 6px; image-rendering: pixelated; }
+.sprite-box .label { font-size: 11px; color: #888; }
+.sheet-box { background: #1a1a2e; padding: 16px; border-radius: 8px; margin: 12px 0; border: 2px solid #2a2a3e; }
+.sheet-box canvas { display: block; image-rendering: pixelated; }
+pre { background: #1a1a2e; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; }
+code { color: #48dbfb; }
+</style>
+</head>
+<body>
+<h1>🎨 SpriteGen Demo</h1>
+<p>Procedural pixel art sprite generator — 9 categories, 80+ variants, animation frames</p>
+
+<h2>Characters (Side Scroll)</h2>
+<div class="grid" id="charSide"></div>
+
+<h2>Characters (Top View)</h2>
+<div class="grid" id="charTop"></div>
+
+<h2>Monsters (Side Scroll)</h2>
+<div class="grid" id="monsterSide"></div>
+
+<h2>Monsters (Top View)</h2>
+<div class="grid" id="monsterTop"></div>
+
+<h2>Buildings</h2>
+<div class="grid" id="buildings"></div>
+
+<h2>Vehicles</h2>
+<div class="grid" id="vehicles"></div>
+
+<h2>Plants</h2>
+<div class="grid" id="plants"></div>
+
+<h2>Items</h2>
+<div class="grid" id="items"></div>
+
+<h2>Props</h2>
+<div class="grid" id="props"></div>
+
+<h2>Animation Frames (Walk Cycle)</h2>
+<p>4-frame walk cycle for side-scroll characters:</p>
+<div id="animFrames"></div>
+
+<h2>Spritesheet</h2>
+<div class="sheet-box" id="spritesheet"></div>
+
+<h2>Usage</h2>
+<pre><code>import { SpriteGen } from './src/spritegen.js';
+
+const gen = new SpriteGen();
+
+// Single sprite
+const canvas = gen.generate('char_side', { variant: 'warrior' });
+
+// Animation frames
+const frames = gen.generateAnimFrames('char_side', { variant: 'ninja', frames: 4 });
+const sheet = gen.createSpritesheet(frames);
+
+// Phaser 4
+const sprite = gen.toPhaserSprite(scene, 100, 200, 'char_side', { variant: 'wizard' });
+gen.toPhaserAnimSheet(scene, 'ninja_walk', 'char_side', { variant: 'ninja', frames: 4 });
+const ninja = scene.add.sprite(200, 200, 'ninja_walk');
+ninja.play('ninja_walk_walk');</code></pre>
+
+<script type="module">
+import { SpriteGen } from '../src/spritegen.js';
+
+const gen = new SpriteGen();
+const scale = 3;
+
+function renderCategory(containerId, category, count) {
+  const container = document.getElementById(containerId);
+  const variants = gen.variants(category);
+  const display = variants.slice(0, count || variants.length);
+  
+  display.forEach(variant => {
+    const canvas = gen.generate(category, { variant });
+    const box = document.createElement('div');
+    box.className = 'sprite-box';
+    
+    const preview = document.createElement('canvas');
+    preview.width = canvas.width * scale;
+    preview.height = canvas.height * scale;
+    preview.style.width = preview.width + 'px';
+    preview.style.height = preview.height + 'px';
+    const ctx = preview.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(canvas, 0, 0, preview.width, preview.height);
+    
+    box.appendChild(preview);
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = variant;
+    box.appendChild(label);
+    container.appendChild(box);
+  });
+}
+
+renderCategory('charSide', 'char_side');
+renderCategory('charTop', 'char_top');
+renderCategory('monsterSide', 'monster_side');
+renderCategory('monsterTop', 'monster_top');
+renderCategory('buildings', 'building');
+renderCategory('vehicles', 'vehicle');
+renderCategory('plants', 'plant');
+renderCategory('items', 'item');
+renderCategory('props', 'prop');
+
+// Animation frames demo
+const animContainer = document.getElementById('animFrames');
+['warrior','wizard','ninja','robot'].forEach(variant => {
+  const frames = gen.generateAnimFrames('char_side', { variant, frames: 4 });
+  const row = document.createElement('div');
+  row.style.display = 'flex';
+  row.style.gap = '8px';
+  row.style.marginBottom = '8px';
+  row.style.alignItems = 'center';
+  
+  const label = document.createElement('span');
+  label.style.width = '80px';
+  label.style.color = '#888';
+  label.style.fontSize = '12px';
+  label.textContent = variant;
+  row.appendChild(label);
+  
+  frames.forEach(f => {
+    const preview = document.createElement('canvas');
+    preview.width = f.width * scale;
+    preview.height = f.height * scale;
+    preview.style.imageRendering = 'pixelated';
+    const ctx = preview.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(f, 0, 0, preview.width, preview.height);
+    row.appendChild(preview);
+  });
+  animContainer.appendChild(row);
+});
+
+// Spritesheet demo
+const sheetBox = document.getElementById('spritesheet');
+const sheetFrames = gen.generateAnimFrames('char_side', { variant: 'warrior', frames: 4 });
+const sheet = gen.createSpritesheet(sheetFrames, 2);
+const sheetPreview = document.createElement('canvas');
+sheetPreview.width = sheet.width * scale;
+sheetPreview.height = sheet.height * scale;
+sheetPreview.style.imageRendering = 'pixelated';
+const sctx = sheetPreview.getContext('2d');
+sctx.imageSmoothingEnabled = false;
+sctx.drawImage(sheet, 0, 0, sheetPreview.width, sheetPreview.height);
+sheetBox.appendChild(sheetPreview);
+</script>
+</body>
+</html>
